@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Porsche | Vendas</title>
+  <style>
+    :root {
+      --ink: #050505;
+      --ink-2: #171717;
+      --panel: #ffffff;
+      --panel-2: #f6f3ef;
+      --panel-3: #ece7df;
+      --muted: #6b6259;
+      --line: rgba(5,5,5,.12);
+      --line-dark: rgba(255,255,255,.13);
+      --red: #d5001c;
+      --red-dark: #a80016;
+      --gold: #c7a46a;
+      --cream: #f8f5f0;
+      --shadow: 0 28px 70px rgba(0,0,0,.16);
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --font: "Porsche Next", "Inter", "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% -10%, rgba(213,0,28,.16), transparent 30%),
+        radial-gradient(circle at 85% 10%, rgba(199,164,106,.16), transparent 34%),
+        linear-gradient(145deg, #0b0b0b 0%, #171717 42%, #f4f0e8 42.2%, #f9f7f2 100%);
+      color: var(--ink);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
+    .shell { width: min(1480px, calc(100vw - 36px)); margin: 0 auto; padding: 30px 0 46px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 22px;
+      color: #fff; margin-bottom: 26px;
+    }
+    .brand { display: flex; align-items: center; gap: 16px; letter-spacing: .04em; }
+    .crest {
+      width: 46px; height: 46px; border: 1px solid rgba(255,255,255,.32);
+      border-radius: 50%; display: grid; place-items: center; color: #fff;
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+      box-shadow: inset 0 0 0 6px rgba(255,255,255,.02);
+      font-weight: 700;
+    }
+    .brand strong { font-weight: 700; font-size: 15px; text-transform: uppercase; }
+    .brand span { display: block; color: rgba(255,255,255,.62); font-size: 12px; margin-top: 3px; letter-spacing: .12em; }
+    .source-pill {
+      border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.78);
+      padding: 10px 14px; border-radius: 999px; font-size: 12px; backdrop-filter: blur(12px);
+    }
+    .hero {
+      display: grid; grid-template-columns: 1.05fr .95fr; gap: 22px; align-items: stretch; margin-bottom: 22px;
+    }
+    .hero-card {
+      color: #fff; min-height: 330px; border-radius: var(--radius-xl); overflow: hidden; position: relative;
+      background:
+        linear-gradient(105deg, rgba(0,0,0,.88), rgba(0,0,0,.70) 46%, rgba(0,0,0,.18)),
+        radial-gradient(circle at 78% 50%, rgba(213,0,28,.38), transparent 22%),
+        linear-gradient(135deg, #090909, #2b2b2b 48%, #16110e);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .hero-card::after {
+      content: ""; position: absolute; inset: auto -9% -33% 42%; height: 65%;
+      background: radial-gradient(closest-side, rgba(255,255,255,.17), transparent 72%);
+      transform: skewX(-12deg); pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; padding: 36px; max-width: 780px; }
+    .eyebrow { color: rgba(255,255,255,.64); text-transform: uppercase; letter-spacing: .18em; font-size: 12px; margin-bottom: 14px; }
+    h1 { font-size: clamp(34px, 5vw, 72px); line-height: .95; margin: 0 0 18px; letter-spacing: -.05em; font-weight: 650; }
+    .hero p { max-width: 650px; color: rgba(255,255,255,.76); font-size: 16px; line-height: 1.6; margin: 0 0 26px; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      border: 0; border-radius: 999px; padding: 12px 17px; font-weight: 700; cursor: pointer;
+      font-family: var(--font); letter-spacing: .01em; transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-red { color: #fff; background: var(--red); box-shadow: 0 14px 28px rgba(213,0,28,.25); }
+    .btn-ghost { color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); }
+    .filters {
+      background: rgba(255,255,255,.86); backdrop-filter: blur(18px); border: 1px solid rgba(255,255,255,.68);
+      border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .filters h2, .panel h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; margin: 0 0 7px; }
+    select, input[type="date"] {
+      width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 14px; padding: 12px 12px;
+      font-family: var(--font); color: var(--ink); outline: none; min-height: 46px;
+    }
+    select:focus, input:focus { border-color: rgba(213,0,28,.6); box-shadow: 0 0 0 4px rgba(213,0,28,.08); }
+    .data-note {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 12px;
+    }
+    .data-note div { background: var(--cream); border: 1px solid var(--line); padding: 11px; border-radius: 14px; }
+    .data-note strong { display:block; font-size: 18px; margin-bottom: 2px; }
+    .grid { display: grid; gap: 18px; }
+    .kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 18px; }
+    .kpi {
+      background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: var(--radius-lg);
+      padding: 19px; box-shadow: 0 18px 40px rgba(0,0,0,.08); min-height: 132px; position: relative; overflow: hidden;
+    }
+    .kpi::after { content:""; position:absolute; right:-34px; bottom:-38px; width:100px; height:100px; border-radius:50%; background:rgba(213,0,28,.06); }
+    .kpi .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 12px; }
+    .kpi .value { font-size: clamp(22px, 2.2vw, 34px); letter-spacing: -.04em; font-weight: 700; line-height: 1.02; word-break: break-word; }
+    .kpi .sub { color: var(--muted); font-size: 12px; margin-top: 10px; }
+    .layout { display: grid; grid-template-columns: 1.35fr .65fr; gap: 18px; align-items: start; }
+    .panel {
+      background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: var(--radius-xl);
+      padding: 22px; box-shadow: 0 18px 46px rgba(0,0,0,.08); overflow: hidden;
+    }
+    .panel.dark { background: #080808; color: #fff; border-color: rgba(255,255,255,.12); }
+    .panel-head { display:flex; align-items:flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .panel-kicker { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .13em; margin-top: 6px; }
+    .dark .panel-kicker { color: rgba(255,255,255,.52); }
+    .chart-wrap { position: relative; width: 100%; height: 320px; }
+    .chart-wrap.tall { height: 420px; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .insights { display: grid; gap: 12px; margin-top: 12px; }
+    .insight-card {
+      border: 1px solid var(--line); background: var(--cream); border-radius: 18px; padding: 15px 15px 14px;
+    }
+    .insight-card strong { display:block; margin-bottom: 6px; }
+    .insight-card p { margin: 0; color: var(--muted); line-height: 1.45; font-size: 13px; }
+    .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 18px; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; background: #fff; }
+    th, td { text-align: left; padding: 14px 13px; border-bottom: 1px solid rgba(0,0,0,.07); font-size: 13px; }
+    th { background: #111; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; position: sticky; top: 0; z-index: 1; }
+    tr:last-child td { border-bottom: 0; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding: 6px 10px; border-radius:999px; background:#f2ede6; color:#3a332d; font-size:12px; font-weight:700; }
+    .badge::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--red); }
+    .footer { color: rgba(0,0,0,.54); font-size: 12px; margin-top: 18px; line-height: 1.5; }
+    .empty { display:grid; place-items:center; min-height: 220px; color: var(--muted); text-align:center; border: 1px dashed var(--line); border-radius: 18px; }
+    .mini-list { display:grid; gap: 10px; margin: 14px 0 0; }
+    .mini-item { display:flex; justify-content:space-between; gap: 12px; border-bottom:1px solid rgba(255,255,255,.1); padding-bottom: 10px; color: rgba(255,255,255,.8); }
+    .mini-item:last-child { border-bottom:0; }
+    .mini-item span:last-child { color:#fff; font-weight:700; }
+    @media (max-width: 1180px) {
+      .hero, .layout { grid-template-columns: 1fr; }
+      .kpis { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 22px, 1480px); padding-top: 18px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .hero-content { padding: 26px; }
+      .filter-grid, .two-cols, .kpis { grid-template-columns: 1fr; }
+      .data-note { grid-template-columns: 1fr; }
+      .chart-wrap, .chart-wrap.tall { height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="crest">P</div>
+        <div><strong>Porsche Sales Intelligence</strong><span>dashboard canvas • vendas</span></div>
+      </div>
+      <div class="source-pill">Base: BASE_DADOS_TRATADA_Final.xlsx · <span id="sourceRows"></span></div>
+    </header>
+
+    <section class="hero">
+      <article class="hero-card">
+        <div class="hero-content">
+          <div class="eyebrow">Refinamento, performance e decisão</div>
+          <h1>Visão executiva das vendas Porsche</h1>
+          <p>Explore modelos, anos, cidades, métodos de pagamento e tendências de venda em uma experiência limpa, escura e elegante — com gráficos renderizados diretamente em HTML Canvas.</p>
+          <div class="hero-actions">
+            <button class="btn btn-red" id="btnResetHero">Limpar filtros</button>
+            <button class="btn btn-ghost" id="btnExport">Exportar visão filtrada CSV</button>
+          </div>
+        </div>
+      </article>
+
+      <aside class="filters" aria-label="Filtros da dashboard">
+        <div class="panel-head">
+          <div>
+            <h2>Filtros</h2>
+            <div class="panel-kicker">controle de análise</div>
+          </div>
+          <button class="btn" id="btnReset">Reset</button>
+        </div>
+        <div class="filter-grid">
+          <div><label for="filterModel">Modelo da Porsche</label><select id="filterModel"></select></div>
+          <div><label for="filterYear">Model year</label><select id="filterYear"></select></div>
+          <div><label for="filterCity">Cidade</label><select id="filterCity"></select></div>
+          <div><label for="filterPayment">Método de pagamento</label><select id="filterPayment"></select></div>
+          <div><label for="dateStart">Período início</label><input type="date" id="dateStart" /></div>
+          <div><label for="dateEnd">Período fim</label><input type="date" id="dateEnd" /></div>
+        </div>
+        <div class="data-note">
+          <div><strong id="metaModels">—</strong>modelos</div>
+          <div><strong id="metaCities">—</strong>cidades</div>
+          <div><strong id="metaDates">—</strong>datas válidas</div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="grid kpis" id="kpiGrid"></section>
+
+    <main class="layout">
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h2>Principais modelos vendidos</h2><div class="panel-kicker">ranking por volume no filtro atual</div></div>
+            <span class="badge" id="recordsBadge">0 vendas</span>
+          </div>
+          <div class="chart-wrap tall"><canvas id="modelChart"></canvas></div>
+        </section>
+
+        <section class="two-cols">
+          <article class="panel dark">
+            <div class="panel-head"><div><h2>Model year mais vendido</h2><div class="panel-kicker">período selecionado</div></div></div>
+            <div class="chart-wrap"><canvas id="yearChart"></canvas></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head"><div><h2>Métodos de pagamento</h2><div class="panel-kicker">participação nas vendas</div></div></div>
+            <div class="chart-wrap"><canvas id="paymentChart"></canvas></div>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div><h2>Principais modelos vendidos por cidade</h2><div class="panel-kicker">cidade + modelo com melhor saída</div></div>
+          </div>
+          <div class="chart-wrap"><canvas id="cityModelChart"></canvas></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div><h2>Insights de carros populares por cidade</h2><div class="panel-kicker">popularidade medida por volume de vendas</div></div></div>
+          <div class="table-wrap"><table id="insightsTable"></table></div>
+        </section>
+      </div>
+
+      <aside class="grid">
+        <section class="panel">
+          <div class="panel-head"><div><h2>Leitura executiva</h2><div class="panel-kicker">insights automáticos</div></div></div>
+          <div class="insights" id="insightCards"></div>
+        </section>
+        <section class="panel dark">
+          <div class="panel-head"><div><h2>Top cidades</h2><div class="panel-kicker">maior volume no filtro</div></div></div>
+          <div class="mini-list" id="topCitiesList"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><h2>Qualidade da base</h2><div class="panel-kicker">observações úteis</div></div></div>
+          <div class="insight-card">
+            <strong>Datas inválidas</strong>
+            <p id="qualityText"></p>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      Dashboard HTML gerada com dados da planilha enviada. A estética usa referências visuais de luxo automotivo: contraste alto, tipografia limpa, cartões amplos e acento vermelho. Nenhuma biblioteca externa é necessária para os gráficos.
+    </footer>
+  </div>
+
+  <script id="records-json" type="application/json">[{"saleId": 6, "saleDate": null, "saleDateRaw": "INVALID", "model": "718 Cayman", "modelYear": "2022", "salesPrice": 79500.0, "vehicleMileage": 9800.0, "paymentMethod": "Credit Card", "city": "Boston", "state": "MA", "salesperson": "Kevin", "deliveryStatus": "Delivered"}, {"saleId": 7, "saleDate": "2024-03-14", "saleDateRaw": "2024-03-14", "model": "911 Turbo S", "modelYear": "2024", "salesPrice": 235000.0, "vehicleMileage": 1200.0, "paymentMethod": "Wire Transfer", "city": "Seattle", "state": "WA", "salesperson": "Amanda Scott", "deliveryStatus": "Delivered"}, {"saleId": 8, "saleDate": "2024-04-18", "saleDateRaw": "2024-04-18", "model": "Cayenne Coupe", "modelYear": "2023", "salesPrice": 112750.0, "vehicleMileage": 6400.0, "paymentMethod": "Financing", "city": "Austin", "state": "TX", "salesperson": "Brian Hall", "deliveryStatus": "In Transit"}, {"saleId": 9, "saleDate": null, "saleDateRaw": "INVALID", "model": "Macan S", "modelYear": "2021", "salesPrice": 68900.0, "vehicleMileage": 28.0, "paymentMethod": "Cash", "city": "Denver", "state": "CO", "salesperson": "Jessica", "deliveryStatus": "Pending"}, {"saleId": 10, "saleDate": "2024-05-22", "saleDateRaw": "2024-05-22", "model": "Taycan 4S", "modelYear": "2024", "salesPrice": 121000.0, "vehicleMileage": 0.0, "paymentMethod": "Bank Transfer", "city": "Los Angeles", "state": "CA", "salesperson": "Thomas King", "deliveryStatus": "Delivered"}, {"saleId": 11, "saleDate": "2024-08-06", "saleDateRaw": "2024-08-06", "model": "Panamera 4", "modelYear": "2023", "salesPrice": 104500.0, "vehicleMileage": 14500.0, "paymentMethod": "Credit Card", "city": "Miami", "state": "FL", "salesperson": "Lisa Ray", "deliveryStatus": "Cancelled"}, {"saleId": 12, "saleDate": "2024-07-11", "saleDateRaw": "2024-07-11", "model": "911 Carrera S", "modelYear": "2020", "salesPrice": 96300.0, "vehicleMileage": 41000.0, "paymentMethod": "Lease", "city": "New York", "state": "NY", "salesperson": "Mark Evans", "deliveryStatus": "Delivered"}, {"saleId": 13, "saleDate": null, "saleDateRaw": "INVALID", "model": "Cayenne E-Hybrid", "modelYear": "2022", "salesPrice": 89750.0, "vehicleMileage": 11744.0, "paymentMethod": "Wire Transfer", "city": "San Diego", "state": "CA", "salesperson": "Nancy Reed", "deliveryStatus": "Pending Approval"}, {"saleId": 14, "saleDate": "2024-08-19", "saleDateRaw": "2024-08-19", "model": "718 Boxster", "modelYear": "2021", "salesPrice": 73500.0, "vehicleMileage": 22300.0, "paymentMethod": "Debit Card", "city": "Chicago", "state": "IL", "salesperson": "George Bell", "deliveryStatus": "Shipped"}, {"saleId": 15, "saleDate": "2024-09-02", "saleDateRaw": "2024-09-02", "model": "Macan GTS", "modelYear": "2024", "salesPrice": 95000.0, "vehicleMileage": 3500.0, "paymentMethod": "Financing", "city": "Phoenix", "state": "AZ", "salesperson": "Helen Brooks", "deliveryStatus": "In Transit"}, {"saleId": 16, "saleDate": "2024-09-17", "saleDateRaw": "2024-09-17", "model": "Taycan Turbo", "modelYear": "2023", "salesPrice": 153200.5, "vehicleMileage": 11.0, "paymentMethod": "ACH Payment", "city": "Dallas", "state": "TX", "salesperson": "Samuel Price", "deliveryStatus": "Delivered"}, {"saleId": 17, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 GT3", "modelYear": "2024", "salesPrice": 241000.0, "vehicleMileage": 750.0, "paymentMethod": "Wire Transfer", "city": "Las Vegas", "state": "NV", "salesperson": "Peter Ford", "deliveryStatus": "Pending"}, {"saleId": 18, "saleDate": "2024-05-11", "saleDateRaw": "2024-05-11", "model": "Panamera Turbo S", "modelYear": "2022", "salesPrice": 132000.0, "vehicleMileage": 19250.0, "paymentMethod": "Cash", "city": "San Jose", "state": "CA", "salesperson": "Angela Green", "deliveryStatus": "Delivered"}, {"saleId": 19, "saleDate": "2024-12-12", "saleDateRaw": "2024-12-12", "model": "Cayenne Turbo GT", "modelYear": "2024", "salesPrice": 188000.0, "vehicleMileage": 2100.0, "paymentMethod": "Crypto Payment", "city": "Houston", "state": "TX", "salesperson": "Victor Stone", "deliveryStatus": "Awaiting Delivery"}, {"saleId": 20, "saleDate": "2024-12-25", "saleDateRaw": "2024-12-25", "model": "911 Carrera Cabriolet", "modelYear": "2023", "salesPrice": 127800.0, "vehicleMileage": 12000.0, "paymentMethod": "Credit Card", "city": "Atlanta", "state": "GA", "salesperson": "Rachel Turner", "deliveryStatus": "Delivered"}, {"saleId": 21, "saleDate": "2025-01-06", "saleDateRaw": "2025-01-06", "model": "Macan", "modelYear": "2021", "salesPrice": 58900.0, "vehicleMileage": 33700.0, "paymentMethod": "Bank Transfer", "city": "Orlando", "state": "FL", "salesperson": "Chris Moore", "deliveryStatus": "Pending"}, {"saleId": 22, "saleDate": null, "saleDateRaw": "INVALID", "model": "718 Spyder RS", "modelYear": "2024", "salesPrice": 164000.0, "vehicleMileage": 900.0, "paymentMethod": "Financing", "city": "Portland", "state": "OR", "salesperson": "Laura Hill", "deliveryStatus": "In Transit"}, {"saleId": 23, "saleDate": "2025-02-14", "saleDateRaw": "2025-02-14", "model": "Taycan Cross Turismo", "modelYear": "2023", "salesPrice": 118500.0, "vehicleMileage": 7800.0, "paymentMethod": "Wire Transfer", "city": "Charlotte", "state": "NC", "salesperson": "Martin Young", "deliveryStatus": "Delivered"}, {"saleId": 24, "saleDate": null, "saleDateRaw": "INVALID", "model": "Cayenne S", "modelYear": "2022", "salesPrice": 91300.0, "vehicleMileage": 16000.0, "paymentMethod": "Credit Card", "city": "Nashville", "state": "TN", "salesperson": "Diana Cooper", "deliveryStatus": "Pending"}, {"saleId": 25, "saleDate": "2025-03-21", "saleDateRaw": "2025-03-21", "model": "911 Targa 4S", "modelYear": "2024", "salesPrice": 158750.0, "vehicleMileage": 2500.0, "paymentMethod": "Lease", "city": "Minneapolis", "state": "MN", "salesperson": "Steve Gray", "deliveryStatus": "Delivered"}, {"saleId": 26, "saleDate": "2025-03-28", "saleDateRaw": "2025-03-28", "model": "Panamera", "modelYear": "2020", "salesPrice": 72000.0, "vehicleMileage": 49000.0, "paymentMethod": "Bank Transfer", "city": "Philadelphia", "state": "PA", "salesperson": "Olivia Ross", "deliveryStatus": "Cancelled"}, {"saleId": 27, "saleDate": "2025-04-09", "saleDateRaw": "2025-04-09", "model": "Macan Electric", "modelYear": "2025", "salesPrice": 86500.0, "vehicleMileage": 0.0, "paymentMethod": "Wire Transfer", "city": "San Antonio", "state": "TX", "salesperson": "Patrick Wood", "deliveryStatus": "Delivered"}, {"saleId": 28, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 Dakar", "modelYear": "2024", "salesPrice": 270000.0, "vehicleMileage": 1050.0, "paymentMethod": "Cash", "city": "Salt Lake City", "state": "UT", "salesperson": "Karen Diaz", "deliveryStatus": "Awaiting Pickup"}, {"saleId": 29, "saleDate": "2025-05-12", "saleDateRaw": "2025-05-12", "model": "Taycan GTS", "modelYear": "2023", "salesPrice": 139000.0, "vehicleMileage": 6250.0, "paymentMethod": "Financing", "city": "Raleigh", "state": "NC", "salesperson": "Justin Cox", "deliveryStatus": "In Transit"}, {"saleId": 30, "saleDate": "2025-06-18", "saleDateRaw": "2025-06-18", "model": "Cayenne", "modelYear": "2021", "salesPrice": 76800.0, "vehicleMileage": 38400.0, "paymentMethod": "Credit Card", "city": "Detroit", "state": "MI", "salesperson": "Betty Ward", "deliveryStatus": "Delivered"}, {"saleId": 31, "saleDate": null, "saleDateRaw": "INVALID", "model": "718 Cayman GT4 RS", "modelYear": "2024", "salesPrice": 173600.0, "vehicleMileage": 400.0, "paymentMethod": "Wire Transfer", "city": "Columbus", "state": "OH", "salesperson": "Gary Reed", "deliveryStatus": "Pending"}, {"saleId": 32, "saleDate": "2025-07-07", "saleDateRaw": "2025-07-07", "model": "911 Carrera GTS", "modelYear": "2022", "salesPrice": 119900.0, "vehicleMileage": 13600.0, "paymentMethod": "Cash", "city": "Indianapolis", "state": "IN", "salesperson": "Maria Foster", "deliveryStatus": "Delivered"}, {"saleId": 33, "saleDate": "2025-07-22", "saleDateRaw": "2025-07-22", "model": "Panamera 4 E-Hybrid", "modelYear": "2023", "salesPrice": 109250.0, "vehicleMileage": 8900.0, "paymentMethod": "Lease", "city": "Fort Worth", "state": "TX", "salesperson": "Harold Bennett", "deliveryStatus": "In Transit"}, {"saleId": 34, "saleDate": "2025-08-14", "saleDateRaw": "2025-08-14", "model": "Macan T", "modelYear": "2022", "salesPrice": 82000.0, "vehicleMileage": 21750.0, "paymentMethod": "Wire Transfer", "city": "Jacksonville", "state": "FL", "salesperson": "Teresa Cook", "deliveryStatus": "Delivered"}, {"saleId": 35, "saleDate": "2025-09-01", "saleDateRaw": "2025-09-01", "model": "Taycan Turbo S", "modelYear": "2025", "salesPrice": 214000.0, "vehicleMileage": 0.0, "paymentMethod": "Crypto Payment", "city": "San Diego", "state": "CA", "salesperson": "Frank Morgan", "deliveryStatus": "Pending Review"}, {"saleId": 36, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 Carrera", "modelYear": "2024", "salesPrice": 124500.0, "vehicleMileage": 4800.0, "paymentMethod": "Credit Card", "city": "Tampa", "state": "FL", "salesperson": "Natalie", "deliveryStatus": "Delivered"}, {"saleId": 37, "saleDate": "2025-09-18", "saleDateRaw": "2025-09-18", "model": "Cayenne S", "modelYear": "2023", "salesPrice": 98200.0, "vehicleMileage": 12200.0, "paymentMethod": "Bank Transfer", "city": "Sacramento", "state": "CA", "salesperson": "Eric Woods", "deliveryStatus": "Pending"}, {"saleId": 38, "saleDate": "2025-10-04", "saleDateRaw": "2025-10-04", "model": "Macan", "modelYear": "2022", "salesPrice": 67500.0, "vehicleMileage": 24100.0, "paymentMethod": "Financing", "city": "Cleveland", "state": "OH", "salesperson": "Patricia Fox", "deliveryStatus": "Delivered"}, {"saleId": 39, "saleDate": "2025-10-12", "saleDateRaw": "2025-10-12", "model": "Taycan", "modelYear": "2025", "salesPrice": 116900.0, "vehicleMileage": 0.0, "paymentMethod": "Wire Transfer", "city": "Milwaukee", "state": "WI", "salesperson": "Alan Price", "deliveryStatus": "In Transit"}, {"saleId": 40, "saleDate": "2025-10-29", "saleDateRaw": "2025-10-29", "model": "Panamera 4S", "modelYear": "2024", "salesPrice": 112000.0, "vehicleMileage": 10.0, "paymentMethod": "Cash", "city": "Kansas City", "state": "MO", "salesperson": "Sandra Hill", "deliveryStatus": "Delivered"}, {"saleId": 41, "saleDate": "2025-02-11", "saleDateRaw": "2025-02-11", "model": "718 Boxster", "modelYear": "2021", "salesPrice": 74000.0, "vehicleMileage": 31000.0, "paymentMethod": "Debit Card", "city": "Omaha", "state": "NE", "salesperson": "Victor Lee", "deliveryStatus": "Cancelled"}, {"saleId": 42, "saleDate": "2025-11-16", "saleDateRaw": "2025-11-16", "model": "911 Turbo", "modelYear": "2024", "salesPrice": 198300.0, "vehicleMileage": 2400.0, "paymentMethod": "Wire Transfer", "city": "Albuquerque", "state": "NM", "salesperson": "Monica", "deliveryStatus": "Awaiting Delivery"}, {"saleId": 43, "saleDate": null, "saleDateRaw": "INVALID", "model": "Cayenne Coupe", "modelYear": "2023", "salesPrice": 103750.0, "vehicleMileage": 6773.0, "paymentMethod": "Wire Transfer", "city": "Tucson", "state": "AZ", "salesperson": "Gregory Adams", "deliveryStatus": "Pending Approval"}, {"saleId": 44, "saleDate": null, "saleDateRaw": "INVALID", "model": "Macan GTS", "modelYear": "2024", "salesPrice": 93600.0, "vehicleMileage": 5800.0, "paymentMethod": "Financing", "city": "Fresno", "state": "CA", "salesperson": "Laura West", "deliveryStatus": "Shipped"}, {"saleId": 45, "saleDate": "2025-12-07", "saleDateRaw": "2025-12-07", "model": "Taycan 4S", "modelYear": "2025", "salesPrice": 129000.0, "vehicleMileage": 0.0, "paymentMethod": "ACH Payment", "city": "Virginia Beach", "state": "VA", "salesperson": "Henry King", "deliveryStatus": "In Transit"}, {"saleId": 46, "saleDate": "2025-12-22", "saleDateRaw": "2025-12-22", "model": "Panamera Turbo", "modelYear": "2022", "salesPrice": 136000.0, "vehicleMileage": 18400.0, "paymentMethod": "Credit Card", "city": "Colorado Springs", "state": "CO", "salesperson": "Amber Clark", "deliveryStatus": "Delivered"}, {"saleId": 47, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 GT3 RS", "modelYear": "2024", "salesPrice": 286500.0, "vehicleMileage": 700.0, "paymentMethod": "Wire Transfer", "city": "Arlington", "state": "TX", "salesperson": "Peter Lane", "deliveryStatus": "Pending"}, {"saleId": 48, "saleDate": "2026-01-08", "saleDateRaw": "2026-01-08", "model": "Cayenne E-Hybrid", "modelYear": "2023", "salesPrice": 92800.0, "vehicleMileage": 15000.0, "paymentMethod": "Lease", "city": "Bakersfield", "state": "CA", "salesperson": "Grace Morris", "deliveryStatus": "Delivered"}, {"saleId": 49, "saleDate": "2026-01-15", "saleDateRaw": "2026-01-15", "model": "Macan T", "modelYear": "2022", "salesPrice": 72400.0, "vehicleMileage": 19750.0, "paymentMethod": "Cash", "city": "Mesa", "state": "AZ", "salesperson": "Kyle Perry", "deliveryStatus": "Awaiting Pickup"}, {"saleId": 50, "saleDate": "2026-01-28", "saleDateRaw": "2026-01-28", "model": "Taycan Turbo", "modelYear": "2025", "salesPrice": 158500.0, "vehicleMileage": 3200.0, "paymentMethod": "Crypto Payment", "city": "Atlanta", "state": "GA", "salesperson": "Megan Reed", "deliveryStatus": "Delivered"}, {"saleId": 51, "saleDate": "2026-02-03", "saleDateRaw": "2026-02-03", "model": "718 Cayman", "modelYear": "2021", "salesPrice": 69900.0, "vehicleMileage": 27600.0, "paymentMethod": "Bank Transfer", "city": "Long Beach", "state": "CA", "salesperson": "Carl Simmons", "deliveryStatus": "Pending"}, {"saleId": 52, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 Targa 4", "modelYear": "2024", "salesPrice": 141250.0, "vehicleMileage": 2100.0, "paymentMethod": "Financing", "city": "Oakland", "state": "CA", "salesperson": "Linda Cole", "deliveryStatus": "In Transit"}, {"saleId": 53, "saleDate": "2026-02-19", "saleDateRaw": "2026-02-19", "model": "Panamera", "modelYear": "2020", "salesPrice": 71500.0, "vehicleMileage": 52000.0, "paymentMethod": "Wire Transfer", "city": "Tulsa", "state": "OK", "salesperson": "Martin Brooks", "deliveryStatus": "Delivered"}, {"saleId": 54, "saleDate": "2026-02-25", "saleDateRaw": "2026-02-25", "model": "Cayenne Turbo", "modelYear": "2023", "salesPrice": 146800.0, "vehicleMileage": 11300.0, "paymentMethod": "Credit Card", "city": "Wichita", "state": "KS", "salesperson": "Diana Long", "deliveryStatus": "Pending"}, {"saleId": 55, "saleDate": "2026-03-01", "saleDateRaw": "2026-03-01", "model": "Macan Electric", "modelYear": "2025", "salesPrice": 89700.0, "vehicleMileage": 0.0, "paymentMethod": "Lease", "city": "New Orleans", "state": "LA", "salesperson": "Steve Ross", "deliveryStatus": "Delivered"}, {"saleId": 56, "saleDate": "2026-03-14", "saleDateRaw": "2026-03-14", "model": "911 Carrera S", "modelYear": "2022", "salesPrice": 104600.0, "vehicleMileage": 15900.0, "paymentMethod": "Bank Transfer", "city": "Honolulu", "state": "HI", "salesperson": "Olivia Cruz", "deliveryStatus": "Cancelled"}, {"saleId": 57, "saleDate": null, "saleDateRaw": "INVALID", "model": "Taycan GTS", "modelYear": "2024", "salesPrice": 142000.0, "vehicleMileage": 6600.0, "paymentMethod": "Wire Transfer", "city": "Anaheim", "state": "CA", "salesperson": "Patrick Wood", "deliveryStatus": "Delivered"}, {"saleId": 58, "saleDate": "2026-04-08", "saleDateRaw": "2026-04-08", "model": "Cayenne", "modelYear": "2021", "salesPrice": 78400.0, "vehicleMileage": 40250.0, "paymentMethod": "Cash", "city": "Henderson", "state": "NV", "salesperson": "Karen Stone", "deliveryStatus": "Awaiting Review"}, {"saleId": 59, "saleDate": null, "saleDateRaw": "INVALID", "model": "718 Spyder RS", "modelYear": "2025", "salesPrice": 169000.0, "vehicleMileage": 850.0, "paymentMethod": "Financing", "city": "Lexington", "state": "KY", "salesperson": "Justin Fox", "deliveryStatus": "In Transit"}, {"saleId": 60, "saleDate": "2026-04-21", "saleDateRaw": "2026-04-21", "model": "911 Dakar", "modelYear": "2024", "salesPrice": 268900.0, "vehicleMileage": 1400.0, "paymentMethod": "Credit Card", "city": "Riverside", "state": "CA", "salesperson": "Betty James", "deliveryStatus": "Delivered"}, {"saleId": 61, "saleDate": "2026-04-29", "saleDateRaw": "2026-04-29", "model": "Panamera 4", "modelYear": "2023", "salesPrice": 101300.0, "vehicleMileage": 12700.0, "paymentMethod": "Wire Transfer", "city": "Corpus Christi", "state": "TX", "salesperson": "Gary Price", "deliveryStatus": "Pending"}, {"saleId": 62, "saleDate": "2026-05-05", "saleDateRaw": "2026-05-05", "model": "Macan S", "modelYear": "2021", "salesPrice": 66750.0, "vehicleMileage": 29800.0, "paymentMethod": "Cash", "city": "St. Louis", "state": "MO", "salesperson": "Maria Green", "deliveryStatus": "Delivered"}, {"saleId": 63, "saleDate": "2026-05-14", "saleDateRaw": "2026-05-14", "model": "Taycan Cross Turismo", "modelYear": "2024", "salesPrice": 127900.0, "vehicleMileage": 7500.0, "paymentMethod": "Lease", "city": "Pittsburgh", "state": "PA", "salesperson": "Harold Young", "deliveryStatus": "In Transit"}, {"saleId": 64, "saleDate": "2026-05-23", "saleDateRaw": "2026-05-23", "model": "Cayenne Turbo GT", "modelYear": "2025", "salesPrice": 1200.0, "vehicleMileage": 1950.0, "paymentMethod": "Wire Transfer", "city": "Cincinnati", "state": "OH", "salesperson": "Teresa Ward", "deliveryStatus": "Delivered"}, {"saleId": 65, "saleDate": "2026-06-02", "saleDateRaw": "2026-06-02", "model": "911 Carrera Cabriolet", "modelYear": "2023", "salesPrice": 132000.0, "vehicleMileage": 8800.0, "paymentMethod": "Crypto Payment", "city": "Anchorage", "state": "AK", "salesperson": "Frank Reed", "deliveryStatus": "Pending Review"}, {"saleId": 66, "saleDate": "2026-06-15", "saleDateRaw": "2026-06-15", "model": "718 Cayman GT4 RS", "modelYear": "2024", "salesPrice": 176400.0, "vehicleMileage": 600.0, "paymentMethod": "Credit Card", "city": "Plano", "state": "TX", "salesperson": "Angela Moore", "deliveryStatus": "Delivered"}, {"saleId": 67, "saleDate": null, "saleDateRaw": "INVALID", "model": "Panamera 4 E-Hybrid", "modelYear": "2022", "salesPrice": 108500.0, "vehicleMileage": 16200.0, "paymentMethod": "Bank Transfer", "city": "Newark", "state": "NJ", "salesperson": "Rachel West", "deliveryStatus": "Cancelled"}, {"saleId": 68, "saleDate": "2026-07-07", "saleDateRaw": "2026-07-07", "model": "Macan", "modelYear": "2021", "salesPrice": 59000.0, "vehicleMileage": 36000.0, "paymentMethod": "Financing", "city": "Greensboro", "state": "NC", "salesperson": "Thomas Fox", "deliveryStatus": "Awaiting Delivery"}, {"saleId": 69, "saleDate": "2026-07-20", "saleDateRaw": "2026-07-20", "model": "Taycan Turbo S", "modelYear": "2025", "salesPrice": 218000.0, "vehicleMileage": 0.0, "paymentMethod": "Wire Transfer", "city": "Lincoln", "state": "NE", "salesperson": "Lisa Dunn", "deliveryStatus": "Pending"}, {"saleId": 70, "saleDate": null, "saleDateRaw": "INVALID", "model": "Cayenne S", "modelYear": "2024", "salesPrice": 99950.0, "vehicleMileage": 5300.0, "paymentMethod": "Debit Card", "city": "Jersey City", "state": "NJ", "salesperson": "Brian Allen", "deliveryStatus": "Delivered"}, {"saleId": 71, "saleDate": "2026-04-08", "saleDateRaw": "2026-04-08", "model": "911 Carrera GTS", "modelYear": "2024", "salesPrice": 121750.0, "vehicleMileage": 5872.0, "paymentMethod": "Credit Card", "city": "Chandler", "state": "AZ", "salesperson": "George Hall", "deliveryStatus": "Delivered"}, {"saleId": 72, "saleDate": "2026-08-18", "saleDateRaw": "2026-08-18", "model": "718 Boxster GTS", "modelYear": "2023", "salesPrice": 91500.0, "vehicleMileage": 13300.0, "paymentMethod": "Lease", "city": "Reno", "state": "NV", "salesperson": "Helen King", "deliveryStatus": "Shipped"}, {"saleId": 73, "saleDate": "2026-08-31", "saleDateRaw": "2026-08-31", "model": "Panamera Turbo S", "modelYear": "2022", "salesPrice": 134000.0, "vehicleMileage": 20100.0, "paymentMethod": "Wire Transfer", "city": "Buffalo", "state": "NY", "salesperson": "Samuel Price", "deliveryStatus": "In Transit"}, {"saleId": 74, "saleDate": "2026-09-09", "saleDateRaw": "2026-09-09", "model": "Macan GTS", "modelYear": "2024", "salesPrice": 96800.0, "vehicleMileage": 0.0, "paymentMethod": "ACH Payment", "city": "Durham", "state": "NC", "salesperson": "Peter Ford", "deliveryStatus": "Delivered"}, {"saleId": 75, "saleDate": "2026-09-17", "saleDateRaw": "2026-09-17", "model": "Taycan 4S", "modelYear": "2025", "salesPrice": 131600.0, "vehicleMileage": 2900.0, "paymentMethod": "Wire Transfer", "city": "Laredo", "state": "TX", "salesperson": "Angela Green", "deliveryStatus": "Pending Approval"}, {"saleId": 76, "saleDate": "2026-09-28", "saleDateRaw": "2026-09-28", "model": "Cayenne E-Hybrid", "modelYear": "2023", "salesPrice": 94300.0, "vehicleMileage": 13100.0, "paymentMethod": "Cash", "city": "Madison", "state": "WI", "salesperson": "Victor Stone", "deliveryStatus": "Delivered"}, {"saleId": 77, "saleDate": "2026-10-06", "saleDateRaw": "2026-10-06", "model": "911 Turbo S", "modelYear": "2025", "salesPrice": 242000.0, "vehicleMileage": 1100.0, "paymentMethod": "Crypto Payment", "city": "Lubbock", "state": "TX", "salesperson": "Rachel Turner", "deliveryStatus": "Awaiting Pickup"}, {"saleId": 78, "saleDate": "2026-10-16", "saleDateRaw": "2026-10-16", "model": "718 Cayman S", "modelYear": "2022", "salesPrice": 82750.0, "vehicleMileage": 22500.0, "paymentMethod": "Credit Card", "city": "Toledo", "state": "OH", "salesperson": "Chris Moore", "deliveryStatus": "Cancelled"}, {"saleId": 79, "saleDate": "2026-10-29", "saleDateRaw": "2026-10-29", "model": "Macan Electric", "modelYear": "2026", "salesPrice": 91300.0, "vehicleMileage": 0.0, "paymentMethod": "Wire Transfer", "city": "Irvine", "state": "CA", "salesperson": "Laura Hill", "deliveryStatus": "Delivered"}, {"saleId": 80, "saleDate": "2026-11-03", "saleDateRaw": "2026-11-03", "model": "Panamera", "modelYear": "2021", "salesPrice": 79900.0, "vehicleMileage": 44800.0, "paymentMethod": "Financing", "city": "Garland", "state": "TX", "salesperson": "Martin Young", "deliveryStatus": "Pending"}, {"saleId": 81, "saleDate": null, "saleDateRaw": "INVALID", "model": "Cayenne Coupe", "modelYear": "2024", "salesPrice": 111000.0, "vehicleMileage": 6700.0, "paymentMethod": "Bank Transfer", "city": "Irving", "state": "TX", "salesperson": "Diana Cooper", "deliveryStatus": "In Transit"}, {"saleId": 82, "saleDate": "2026-12-11", "saleDateRaw": "2026-12-11", "model": "911 Targa 4S", "modelYear": "2023", "salesPrice": 156500.0, "vehicleMileage": 4200.0, "paymentMethod": "Cash", "city": "Chesapeake", "state": "VA", "salesperson": "Steve Gray", "deliveryStatus": "Delivered"}, {"saleId": 83, "saleDate": "2026-12-24", "saleDateRaw": "2026-12-24", "model": "Taycan", "modelYear": "2025", "salesPrice": 119900.0, "vehicleMileage": 1250.0, "paymentMethod": "Lease", "city": "Scottsdale", "state": "AZ", "salesperson": "Olivia Ross", "deliveryStatus": "Pending"}, {"saleId": 84, "saleDate": null, "saleDateRaw": "INVALID", "model": "Macan T", "modelYear": "2022", "salesPrice": 73200.0, "vehicleMileage": 18600.0, "paymentMethod": "Wire Transfer", "city": "Norfolk", "state": "VA", "salesperson": "Patrick Wood", "deliveryStatus": "Delivered"}, {"saleId": 85, "saleDate": "2026-12-28", "saleDateRaw": "2026-12-28", "model": "911 GT3", "modelYear": "2024", "salesPrice": 224000.0, "vehicleMileage": 3000.0, "paymentMethod": "Wire Transfer", "city": "Boise", "state": "ID", "salesperson": "Karen Diaz", "deliveryStatus": "Awaiting Delivery"}, {"saleId": 86, "saleDate": "2027-01-15", "saleDateRaw": "2027-01-15", "model": "911 Carrera", "modelYear": "2024", "salesPrice": 126900.0, "vehicleMileage": 7200.0, "paymentMethod": "Credit Card", "city": "Orlando", "state": "FL", "salesperson": "Kevin Brown", "deliveryStatus": "Delivered"}, {"saleId": 87, "saleDate": "2027-01-29", "saleDateRaw": "2027-01-29", "model": "Cayenne", "modelYear": "2023", "salesPrice": 84500.0, "vehicleMileage": 21400.0, "paymentMethod": "Bank Transfer", "city": "San Jose", "state": "CA", "salesperson": "Amanda Lee", "deliveryStatus": "Pending"}, {"saleId": 88, "saleDate": "2027-02-11", "saleDateRaw": "2027-02-11", "model": "Macan S", "modelYear": "2022", "salesPrice": 69800.0, "vehicleMileage": 26300.0, "paymentMethod": "Financing", "city": "Tampa", "state": "FL", "salesperson": "Brian Hall", "deliveryStatus": "Delivered"}, {"saleId": 89, "saleDate": null, "saleDateRaw": "INVALID", "model": "Taycan 4S", "modelYear": "2025", "salesPrice": 132700.0, "vehicleMileage": 0.0, "paymentMethod": "Wire Transfer", "city": "Denver", "state": "CO", "salesperson": "Jessica White", "deliveryStatus": "In Transit"}, {"saleId": 90, "saleDate": "2027-03-05", "saleDateRaw": "2027-03-05", "model": "Panamera", "modelYear": "2021", "salesPrice": 81000.0, "vehicleMileage": 42.0, "paymentMethod": "Cash", "city": "Austin", "state": "TX", "salesperson": "Thomas King", "deliveryStatus": "Delivered"}, {"saleId": 91, "saleDate": "2027-03-18", "saleDateRaw": "2027-03-18", "model": "718 Cayman", "modelYear": "2023", "salesPrice": 78900.0, "vehicleMileage": 17500.0, "paymentMethod": "Debit Card", "city": "Seattle", "state": "WA", "salesperson": "Victor Lee", "deliveryStatus": "Cancelled"}, {"saleId": 92, "saleDate": "2027-04-02", "saleDateRaw": "2027-04-02", "model": "911 Turbo S", "modelYear": "2026", "salesPrice": 249300.0, "vehicleMileage": 900.0, "paymentMethod": "Wire Transfer", "city": "Boston", "state": "MA", "salesperson": "Monica Green", "deliveryStatus": "Awaiting Delivery"}, {"saleId": 93, "saleDate": null, "saleDateRaw": "INVALID", "model": "Cayenne Coupe", "modelYear": "2024", "salesPrice": 108750.0, "vehicleMileage": 5530.0, "paymentMethod": "Wire Transfer", "city": "Phoenix", "state": "AZ", "salesperson": "Gregory Adams", "deliveryStatus": "Pending Approval"}, {"saleId": 94, "saleDate": null, "saleDateRaw": "INVALID", "model": "Macan Electric", "modelYear": "2026", "salesPrice": 92600.0, "vehicleMileage": 0.0, "paymentMethod": "Financing", "city": "Chicago", "state": "IL", "salesperson": "Laura West", "deliveryStatus": "Shipped"}, {"saleId": 95, "saleDate": "2027-05-12", "saleDateRaw": "2027-05-12", "model": "Taycan Turbo", "modelYear": "2025", "salesPrice": 164000.0, "vehicleMileage": 0.0, "paymentMethod": "ACH Payment", "city": "Dallas", "state": "TX", "salesperson": "Henry King", "deliveryStatus": "In Transit"}, {"saleId": 96, "saleDate": "2027-05-27", "saleDateRaw": "2027-05-27", "model": "Panamera 4S", "modelYear": "2024", "salesPrice": 119000.0, "vehicleMileage": 13400.0, "paymentMethod": "Credit Card", "city": "San Francisco", "state": "CA", "salesperson": "Amber Clark", "deliveryStatus": "Delivered"}, {"saleId": 97, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 GT3", "modelYear": "2026", "salesPrice": 232500.0, "vehicleMileage": 1700.0, "paymentMethod": "Wire Transfer", "city": "Las Vegas", "state": "NV", "salesperson": "Peter Lane", "deliveryStatus": "Pending"}, {"saleId": 98, "saleDate": "2027-06-18", "saleDateRaw": "2027-06-18", "model": "Cayenne E-Hybrid", "modelYear": "2023", "salesPrice": 96800.0, "vehicleMileage": 14000.0, "paymentMethod": "Lease", "city": "Charlotte", "state": "NC", "salesperson": "Grace Morris", "deliveryStatus": "Delivered"}, {"saleId": 99, "saleDate": "2027-07-03", "saleDateRaw": "2027-07-03", "model": "Macan T", "modelYear": "2022", "salesPrice": 74400.0, "vehicleMileage": 20750.0, "paymentMethod": "Cash", "city": "Mesa", "state": "AZ", "salesperson": "Kyle Perry", "deliveryStatus": "Awaiting Pickup"}, {"saleId": 100, "saleDate": "2027-07-22", "saleDateRaw": "2027-07-22", "model": "Taycan GTS", "modelYear": "2025", "salesPrice": 148500.0, "vehicleMileage": 5200.0, "paymentMethod": "Crypto Payment", "city": "Atlanta", "state": "GA", "salesperson": "Megan Reed", "deliveryStatus": "Delivered"}, {"saleId": 101, "saleDate": "2027-08-08", "saleDateRaw": "2027-08-08", "model": "718 Boxster", "modelYear": "2021", "salesPrice": 71900.0, "vehicleMileage": 29600.0, "paymentMethod": "Bank Transfer", "city": "Long Beach", "state": "CA", "salesperson": "Carl Simmons", "deliveryStatus": "Pending"}, {"saleId": 102, "saleDate": null, "saleDateRaw": "INVALID", "model": "911 Targa 4", "modelYear": "2024", "salesPrice": 143250.0, "vehicleMileage": 3100.0, "paymentMethod": "Financing", "city": "Oakland", "state": "CA", "salesperson": "Linda Cole", "deliveryStatus": "In Transit"}, {"saleId": 103, "saleDate": "2027-09-19", "saleDateRaw": "2027-09-19", "model": "Panamera Turbo", "modelYear": "2020", "salesPrice": 137500.0, "vehicleMileage": 48000.0, "paymentMethod": "Wire Transfer", "city": "Tulsa", "state": "OK", "salesperson": "Martin Brooks", "deliveryStatus": "Delivered"}, {"saleId": 104, "saleDate": "2027-09-25", "saleDateRaw": "2027-09-25", "model": "Cayenne Turbo GT", "modelYear": "2025", "salesPrice": 204800.0, "vehicleMileage": 3300.0, "paymentMethod": "Credit Card", "city": "Wichita", "state": "KS", "salesperson": "Diana Long", "deliveryStatus": "Pending"}, {"saleId": 105, "saleDate": "2027-10-01", "saleDateRaw": "2027-10-01", "model": "911 Dakar", "modelYear": "2024", "salesPrice": 271700.0, "vehicleMileage": 1050.0, "paymentMethod": "Lease", "city": "New Orleans", "state": "LA", "salesperson": "Steve Ross", "deliveryStatus": "Delivered"}]</script>
+  <script id="metadata-json" type="application/json">{"totalRows": 100, "validDates": 76, "invalidDates": 24, "minDate": "2024-03-14", "maxDate": "2027-10-01", "modelCount": 40, "cityCount": 79, "yearCount": 7}</script>
+  <script>
+  (() => {
+  'use strict';
+  const records = JSON.parse(document.getElementById('records-json').textContent);
+  const metadata = JSON.parse(document.getElementById('metadata-json').textContent);
+  const $ = (id) => document.getElementById(id);
+  const RED = '#d5001c';
+  const GOLD = '#c7a46a';
+  const INK = '#050505';
+  const MUTED = '#6b6259';
+  const GRID = 'rgba(5,5,5,.10)';
+  const LIGHT = '#f6f3ef';
+  const palette = ['#d5001c', '#111111', '#c7a46a', '#6b6259', '#a80016', '#8b8176', '#e2d6c5', '#44403a', '#f0c6ca'];
+
+  const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const number = new Intl.NumberFormat('pt-BR');
+  const pct = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 });
+
+  function unique(key) { return [...new Set(records.map(r => r[key]).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b), 'pt-BR', { numeric:true })); }
+  function fillSelect(id, values, allLabel) {
+    const el = $(id);
+    el.innerHTML = `<option value="">${allLabel}</option>` + values.map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join('');
+  }
+  function escapeHTML(s) { return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c])); }
+
+  function setupFilters() {
+    fillSelect('filterModel', unique('model'), 'Todos os modelos');
+    fillSelect('filterYear', unique('modelYear'), 'Todos os anos');
+    fillSelect('filterCity', unique('city'), 'Todas as cidades');
+    fillSelect('filterPayment', unique('paymentMethod'), 'Todos os métodos');
+    $('dateStart').min = metadata.minDate || '';
+    $('dateStart').max = metadata.maxDate || '';
+    $('dateEnd').min = metadata.minDate || '';
+    $('dateEnd').max = metadata.maxDate || '';
+    $('metaModels').textContent = metadata.modelCount;
+    $('metaCities').textContent = metadata.cityCount;
+    $('metaDates').textContent = `${metadata.validDates}/${metadata.totalRows}`;
+    $('sourceRows').textContent = `${metadata.totalRows} linhas`;
+    $('qualityText').textContent = `${metadata.invalidDates} registros possuem data de venda inválida. Eles entram nas análises gerais, mas são excluídos quando um período é aplicado.`;
+    ['filterModel','filterYear','filterCity','filterPayment','dateStart','dateEnd'].forEach(id => $(id).addEventListener('input', update));
+    $('btnReset').addEventListener('click', resetFilters);
+    $('btnResetHero').addEventListener('click', resetFilters);
+    $('btnExport').addEventListener('click', exportCSV);
+  }
+
+  function resetFilters() {
+    ['filterModel','filterYear','filterCity','filterPayment'].forEach(id => $(id).value = '');
+    $('dateStart').value = '';
+    $('dateEnd').value = '';
+    update();
+  }
+
+  function filteredRecords() {
+    const model = $('filterModel').value;
+    const year = $('filterYear').value;
+    const city = $('filterCity').value;
+    const payment = $('filterPayment').value;
+    const start = $('dateStart').value;
+    const end = $('dateEnd').value;
+    return records.filter(r => {
+      if (model && r.model !== model) return false;
+      if (year && r.modelYear !== year) return false;
+      if (city && r.city !== city) return false;
+      if (payment && r.paymentMethod !== payment) return false;
+      if ((start || end) && !r.saleDate) return false;
+      if (start && r.saleDate < start) return false;
+      if (end && r.saleDate > end) return false;
+      return true;
+    });
+  }
+
+  function groupBy(arr, keyFn, valueFn = () => 1) {
+    const map = new Map();
+    for (const item of arr) {
+      const key = keyFn(item);
+      const val = valueFn(item);
+      map.set(key, (map.get(key) || 0) + val);
+    }
+    return [...map.entries()].sort((a,b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])));
+  }
+  function getTopItems(arr, keyFn, n=1) { return groupBy(arr, keyFn).slice(0,n); }
+  function avg(arr, keyFn) { return arr.length ? arr.reduce((s,r)=>s+keyFn(r),0)/arr.length : 0; }
+  function sum(arr, keyFn) { return arr.reduce((s,r)=>s+keyFn(r),0); }
+  function family(model) {
+    if (model.startsWith('911')) return '911';
+    if (model.startsWith('718')) return '718';
+    if (model.includes('Cayenne')) return 'Cayenne';
+    if (model.includes('Macan')) return 'Macan';
+    if (model.includes('Taycan')) return 'Taycan';
+    if (model.includes('Panamera')) return 'Panamera';
+    return 'Outros';
+  }
+  function shortLabel(label, max=18) { return label.length > max ? label.slice(0, max-1) + '…' : label; }
+
+  function setupCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(rect.width * dpr);
+    canvas.height = Math.floor(rect.height * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w: rect.width, h: rect.height };
+  }
+  function clearChart(canvas, bg = 'transparent') {
+    const {ctx,w,h} = setupCanvas(canvas);
+    ctx.clearRect(0,0,w,h);
+    if (bg !== 'transparent') { ctx.fillStyle = bg; ctx.fillRect(0,0,w,h); }
+    return {ctx,w,h};
+  }
+  function drawEmpty(canvas, message, dark=false) {
+    const {ctx,w,h} = clearChart(canvas);
+    ctx.fillStyle = dark ? 'rgba(255,255,255,.64)' : MUTED;
+    ctx.font = '600 14px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(message, w/2, h/2);
+  }
+
+  function drawHorizontalBars(canvas, rows, opts={}) {
+    const dark = !!opts.dark;
+    if (!rows.length) return drawEmpty(canvas, 'Sem dados para os filtros selecionados', dark);
+    const {ctx,w,h} = clearChart(canvas);
+    const margin = { top: 22, right: 34, bottom: 28, left: opts.left || 170 };
+    const innerW = Math.max(60, w - margin.left - margin.right);
+    const innerH = Math.max(60, h - margin.top - margin.bottom);
+    const max = Math.max(...rows.map(r => r.value), 1);
+    const rowH = innerH / rows.length;
+    ctx.textBaseline = 'middle';
+    rows.forEach((r, i) => {
+      const y = margin.top + i * rowH + rowH * .18;
+      const bh = Math.max(8, rowH * .58);
+      const x = margin.left;
+      const bw = innerW * (r.value / max);
+      ctx.fillStyle = dark ? 'rgba(255,255,255,.08)' : 'rgba(5,5,5,.06)';
+      roundRect(ctx, x, y, innerW, bh, 999, true);
+      const grad = ctx.createLinearGradient(x, y, x+bw, y);
+      grad.addColorStop(0, palette[i % palette.length]);
+      grad.addColorStop(1, i % 2 ? '#c7a46a' : '#a80016');
+      ctx.fillStyle = grad;
+      roundRect(ctx, x, y, bw, bh, 999, true);
+      ctx.fillStyle = dark ? 'rgba(255,255,255,.82)' : '#211f1d';
+      ctx.font = '600 12px Segoe UI, Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(shortLabel(r.label, opts.labelMax || 24), margin.left - 12, y + bh/2);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = dark ? '#fff' : INK;
+      ctx.font = '700 12px Segoe UI, Arial';
+      ctx.fillText(number.format(r.value), x + bw + 9, y + bh/2);
+    });
+    ctx.fillStyle = dark ? 'rgba(255,255,255,.45)' : MUTED;
+    ctx.font = '11px Segoe UI, Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(opts.caption || 'volume de vendas', w - margin.right, h - 8);
+  }
+
+  function drawVerticalBars(canvas, rows, opts={}) {
+    const dark = !!opts.dark;
+    if (!rows.length) return drawEmpty(canvas, 'Sem dados para os filtros selecionados', dark);
+    const {ctx,w,h} = clearChart(canvas);
+    const margin = { top: 18, right: 16, bottom: 56, left: 42 };
+    const innerW = Math.max(60, w - margin.left - margin.right);
+    const innerH = Math.max(60, h - margin.top - margin.bottom);
+    const max = Math.max(...rows.map(r => r.value), 1);
+    ctx.strokeStyle = dark ? 'rgba(255,255,255,.11)' : GRID;
+    ctx.lineWidth = 1;
+    for (let i=0;i<=4;i++) {
+      const y = margin.top + innerH * (i/4);
+      ctx.beginPath(); ctx.moveTo(margin.left, y); ctx.lineTo(w-margin.right, y); ctx.stroke();
+    }
+    const gap = 12;
+    const bw = Math.max(12, (innerW - gap*(rows.length-1)) / rows.length);
+    rows.forEach((r,i) => {
+      const bh = innerH * (r.value/max);
+      const x = margin.left + i*(bw+gap);
+      const y = margin.top + innerH - bh;
+      const grad = ctx.createLinearGradient(0, y, 0, y+bh);
+      grad.addColorStop(0, palette[i % palette.length]);
+      grad.addColorStop(1, i % 2 ? '#8a6d3b' : '#870012');
+      ctx.fillStyle = grad;
+      roundRect(ctx, x, y, bw, bh, 10, true);
+      ctx.fillStyle = dark ? 'rgba(255,255,255,.88)' : INK;
+      ctx.font = '700 12px Segoe UI, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(number.format(r.value), x+bw/2, y-9);
+      ctx.save();
+      ctx.translate(x+bw/2, margin.top+innerH+15);
+      ctx.rotate(-Math.PI/6);
+      ctx.font = '600 11px Segoe UI, Arial';
+      ctx.fillStyle = dark ? 'rgba(255,255,255,.70)' : MUTED;
+      ctx.textAlign = 'right';
+      ctx.fillText(shortLabel(r.label, 13), 0, 0);
+      ctx.restore();
+    });
+  }
+
+  function drawDonut(canvas, rows) {
+    if (!rows.length) return drawEmpty(canvas, 'Sem dados para os filtros selecionados');
+    const {ctx,w,h} = clearChart(canvas);
+    const total = rows.reduce((s,r)=>s+r.value,0) || 1;
+    const cx = w*.36, cy = h*.47, radius = Math.min(w,h)*.27, cut = radius*.58;
+    let start = -Math.PI/2;
+    rows.forEach((r,i) => {
+      const angle = (r.value/total) * Math.PI*2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, start, start + angle);
+      ctx.arc(cx, cy, cut, start + angle, start, true);
+      ctx.closePath();
+      ctx.fillStyle = palette[i % palette.length];
+      ctx.fill();
+      start += angle;
+    });
+    ctx.fillStyle = INK;
+    ctx.font = '700 20px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(number.format(total), cx, cy-2);
+    ctx.font = '12px Segoe UI, Arial';
+    ctx.fillStyle = MUTED;
+    ctx.fillText('vendas', cx, cy+18);
+    const lx = w*.62;
+    rows.slice(0,7).forEach((r,i) => {
+      const y = 34 + i*30;
+      ctx.fillStyle = palette[i % palette.length];
+      roundRect(ctx, lx, y-8, 12, 12, 3, true);
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 12px Segoe UI, Arial';
+      ctx.fillText(shortLabel(r.label, 18), lx+20, y);
+      ctx.fillStyle = MUTED;
+      ctx.font = '12px Segoe UI, Arial';
+      ctx.fillText(`${number.format(r.value)} • ${pct.format(r.value/total)}`, lx+20, y+15);
+    });
+  }
+
+  function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+    const r = Math.min(radius, height/2, width/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+width, y, x+width, y+height, r);
+    ctx.arcTo(x+width, y+height, x, y+height, r);
+    ctx.arcTo(x, y+height, x, y, r);
+    ctx.arcTo(x, y, x+width, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  function updateKPIs(data) {
+    const sales = data.length;
+    const revenue = sum(data, r => r.salesPrice);
+    const avgTicket = avg(data, r => r.salesPrice);
+    const topModel = getTopItems(data, r => r.model, 1)[0];
+    const topYear = getTopItems(data, r => r.modelYear, 1)[0];
+    const topCity = getTopItems(data, r => r.city, 1)[0];
+    const delivered = data.filter(r => /delivered/i.test(r.deliveryStatus)).length;
+    const cards = [
+      ['Vendas', number.format(sales), `${data.filter(r=>r.saleDate).length} com data válida`],
+      ['Receita', currency.format(revenue), 'soma do preço de venda'],
+      ['Ticket médio', currency.format(avgTicket), 'preço médio por veículo'],
+      ['Modelo líder', topModel ? topModel[0] : '—', topModel ? `${topModel[1]} venda(s)` : 'sem dados'],
+      ['Model year líder', topYear ? topYear[0] : '—', topYear ? `${topYear[1]} venda(s)` : 'sem dados'],
+      ['Cidade líder', topCity ? topCity[0] : '—', topCity ? `${topCity[1]} venda(s) · ${delivered} delivered` : 'sem dados'],
+    ];
+    $('kpiGrid').innerHTML = cards.map(c => `<article class="kpi"><div class="label">${escapeHTML(c[0])}</div><div class="value">${escapeHTML(c[1])}</div><div class="sub">${escapeHTML(c[2])}</div></article>`).join('');
+    $('recordsBadge').textContent = `${number.format(sales)} vendas`;
+  }
+
+  function updateCharts(data) {
+    const topModels = groupBy(data, r => r.model).slice(0, 12).map(([label,value]) => ({label,value}));
+    drawHorizontalBars($('modelChart'), topModels, { left: 190, labelMax: 28, caption: 'top 12 modelos por vendas' });
+    const years = groupBy(data, r => r.modelYear).map(([label,value]) => ({label,value})).sort((a,b)=>String(a.label).localeCompare(String(b.label), undefined, {numeric:true}));
+    drawVerticalBars($('yearChart'), years, { dark: true });
+    const payments = groupBy(data, r => r.paymentMethod).slice(0, 9).map(([label,value]) => ({label,value}));
+    drawDonut($('paymentChart'), payments);
+
+    let cityModelRows = [];
+    const selectedCity = $('filterCity').value;
+    if (selectedCity) {
+      cityModelRows = groupBy(data, r => r.model).slice(0, 10).map(([label,value]) => ({ label, value }));
+    } else {
+      const cityMap = new Map();
+      for (const r of data) {
+        if (!cityMap.has(r.city)) cityMap.set(r.city, []);
+        cityMap.get(r.city).push(r);
+      }
+      cityModelRows = [...cityMap.entries()].map(([city, items]) => {
+        const leader = getTopItems(items, r => r.model, 1)[0];
+        return { label: `${city} · ${leader ? leader[0] : '—'}`, value: items.length };
+      }).sort((a,b)=>b.value-a.value).slice(0, 12);
+    }
+    drawHorizontalBars($('cityModelChart'), cityModelRows, { left: 245, labelMax: 35, caption: selectedCity ? 'modelos na cidade selecionada' : 'cidade + modelo líder' });
+  }
+
+  function updateInsights(data) {
+    const topModel = getTopItems(data, r => r.model, 1)[0];
+    const topYear = getTopItems(data, r => r.modelYear, 1)[0];
+    const topPayment = getTopItems(data, r => r.paymentMethod, 1)[0];
+    const fam = getTopItems(data, r => family(r.model), 1)[0];
+    const topCityRows = groupBy(data, r => r.city).slice(0, 5);
+    $('topCitiesList').innerHTML = topCityRows.length ? topCityRows.map(([city, qty]) => `<div class="mini-item"><span>${escapeHTML(city)}</span><span>${qty}</span></div>`).join('') : '<div class="mini-item"><span>Sem dados</span><span>—</span></div>';
+
+    const messages = [];
+    if (!data.length) {
+      messages.push(['Sem dados no filtro atual', 'Ajuste os filtros para voltar a visualizar os KPIs e os gráficos.']);
+    } else {
+      messages.push(['Modelo com maior saída', `${topModel[0]} lidera o filtro atual com ${topModel[1]} venda(s). Use esse dado para priorizar vitrine, estoque e campanhas por cidade.`]);
+      messages.push(['Ano de modelo dominante', `O model year ${topYear[0]} é o mais vendido no período/recorte selecionado, com ${topYear[1]} ocorrência(s).`]);
+      messages.push(['Perfil de procura', `A família ${fam[0]} aparece como a mais recorrente. Isso indica maior aderência desse tipo de carro nas cidades filtradas.`]);
+      messages.push(['Pagamento preferido', `${topPayment[0]} concentra ${topPayment[1]} venda(s). Pode ser um sinal para ofertas, comunicação comercial e condições de fechamento.`]);
+    }
+    $('insightCards').innerHTML = messages.map(m => `<article class="insight-card"><strong>${escapeHTML(m[0])}</strong><p>${escapeHTML(m[1])}</p></article>`).join('');
+  }
+
+  function buildCityTable(data) {
+    const cityGroups = new Map();
+    for (const r of data) {
+      if (!cityGroups.has(r.city)) cityGroups.set(r.city, []);
+      cityGroups.get(r.city).push(r);
+    }
+    const globalAvg = avg(data, r => r.salesPrice);
+    const rows = [...cityGroups.entries()].map(([city, items]) => {
+      const state = items[0]?.state || '';
+      const topModel = getTopItems(items, r => r.model, 1)[0] || ['—', 0];
+      const topYear = getTopItems(items, r => r.modelYear, 1)[0] || ['—', 0];
+      const topFamily = getTopItems(items, r => family(r.model), 1)[0] || ['—', 0];
+      const revenue = sum(items, r => r.salesPrice);
+      const avgPrice = avg(items, r => r.salesPrice);
+      let insight = 'Boa oportunidade para ações locais segmentadas.';
+      if (topFamily[0] === 'Macan' || topFamily[0] === 'Cayenne') insight = 'SUVs mostram boa aceitação local; vale reforçar campanhas dessa família.';
+      if (topFamily[0] === 'Taycan') insight = 'Elétricos ganham destaque; explore mensagens de tecnologia e performance.';
+      if (topFamily[0] === '911') insight = 'Perfil esportivo/premium forte; destaque exclusividade e performance.';
+      if (avgPrice > globalAvg * 1.15) insight = 'Ticket acima da média; cidade com apelo para versões premium.';
+      return { city, state, qty: items.length, topModel: topModel[0], topModelQty: topModel[1], topYear: topYear[0], topFamily: topFamily[0], revenue, avgPrice, insight };
+    }).sort((a,b)=>b.qty-a.qty || b.revenue-a.revenue).slice(0, 15);
+
+    const head = `<thead><tr><th>Cidade</th><th>Vendas</th><th>Modelo popular</th><th>Família</th><th>Model year</th><th>Receita</th><th>Ticket médio</th><th>Insight comercial</th></tr></thead>`;
+    const body = rows.length ? rows.map(r => `<tr><td><strong>${escapeHTML(r.city)}</strong> <span style="color:#8b8176">${escapeHTML(r.state)}</span></td><td>${r.qty}</td><td>${escapeHTML(r.topModel)} <span style="color:#8b8176">(${r.topModelQty})</span></td><td><span class="badge">${escapeHTML(r.topFamily)}</span></td><td>${escapeHTML(r.topYear)}</td><td>${currency.format(r.revenue)}</td><td>${currency.format(r.avgPrice)}</td><td>${escapeHTML(r.insight)}</td></tr>`).join('') : `<tr><td colspan="8">Sem dados para os filtros selecionados.</td></tr>`;
+    $('insightsTable').innerHTML = head + `<tbody>${body}</tbody>`;
+  }
+
+  function exportCSV() {
+    const data = filteredRecords();
+    const headers = ['saleId','saleDate','model','modelYear','salesPrice','vehicleMileage','paymentMethod','city','state','salesperson','deliveryStatus'];
+    const lines = [headers.join(',')];
+    for (const r of data) {
+      lines.push(headers.map(h => `"${String(r[h] ?? '').replaceAll('"','""')}"`).join(','));
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'porsche_vendas_filtrado.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function update() {
+    const data = filteredRecords();
+    updateKPIs(data);
+    updateCharts(data);
+    updateInsights(data);
+    buildCityTable(data);
+  }
+
+  window.addEventListener('resize', () => update());
+  setupFilters();
+  update();
+  })();
+  </script>
+</body>
+</html>
